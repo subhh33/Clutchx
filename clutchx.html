@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLUTCHX — India's First Moto-Social Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #080808;
+  --carbon: #121212;
+  --metal: #1E1E1E;
+  --red: #E53935;
+  --red-dim: rgba(229,57,53,0.15);
+  --red-glow: rgba(229,57,53,0.4);
+  --white: #FFFFFF;
+  --grey: #888;
+  --light: #ccc;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  cursor: none;
+  overflow-x: hidden;
+}
+
+/* CUSTOM CURSOR */
+#cursor {
+  width: 12px; height: 12px;
+  background: var(--red);
+  border-radius: 50%;
+  position: fixed; top:0; left:0;
+  pointer-events: none;
+  z-index: 99999;
+  transition: transform 0.1s ease;
+  mix-blend-mode: normal;
+}
+#cursor-ring {
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(229,57,53,0.5);
+  border-radius: 50%;
+  position: fixed; top:0; left:0;
+  pointer-events: none;
+  z-index: 99998;
+  transition: transform 0.25s ease, width 0.2s, height 0.2s;
+}
+body:has(a:hover) #cursor-ring,
+body:has(button:hover) #cursor-ring { transform: translate(-50%,-50%) scale(1.8); }
+
+/* LOADING SCREEN */
+#loader {
+  position: fixed; inset:0;
+  background: var(--black);
+  z-index: 99997;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  transition: opacity 0.8s ease;
+}
+.loader-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(60px,10vw,120px);
+  letter-spacing: 12px;
+  color: var(--white);
+  position: relative;
+}
+.loader-logo::after {
+  content: '';
+  position: absolute;
+  bottom: -8px; left: 0; width: 0; height: 3px;
+  background: var(--red);
+  animation: loadLine 1.8s ease forwards 0.3s;
+}
+@keyframes loadLine { to { width:100%; } }
+.loader-bar {
+  width: 200px; height: 2px;
+  background: rgba(255,255,255,0.1);
+  margin-top: 40px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.loader-progress {
+  height: 100%; width: 0;
+  background: var(--red);
+  animation: loadProgress 1.6s ease forwards 0.2s;
+}
+@keyframes loadProgress { to { width:100%; } }
+.loader-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: var(--grey);
+  margin-top: 20px;
+  text-transform: uppercase;
+}
+
+/* NAVBAR */
+nav {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 1000;
+  padding: 20px 40px;
+  display: flex; align-items:center; justify-content:space-between;
+  transition: all 0.4s ease;
+}
+nav.scrolled {
+  background: rgba(8,8,8,0.95);
+  backdrop-filter: blur(20px);
+  padding: 14px 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: var(--white);
+  text-decoration: none;
+  cursor: none;
+}
+.nav-logo span { color: var(--red); }
+.nav-links {
+  display: flex; align-items:center; gap: 28px;
+  list-style: none;
+}
+.nav-links a {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--light);
+  text-decoration: none;
+  cursor: none;
+  transition: color 0.2s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left:0; width:0; height: 1px;
+  background: var(--red);
+  transition: width 0.25s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  background: var(--red) !important;
+  color: var(--white) !important;
+  padding: 9px 20px !important;
+  border-radius: 3px !important;
+  font-weight: 600 !important;
+}
+.nav-cta::after { display:none !important; }
+.nav-cta:hover { background: #c62828 !important; }
+
+/* HAMBURGER */
+.hamburger { display:none; flex-direction:column; gap:5px; cursor:none; padding:4px; }
+.hamburger span { width:24px; height:2px; background:var(--white); transition:all 0.3s; }
+
+.mobile-menu {
+  display: none;
+  position: fixed; inset:0;
+  background: rgba(8,8,8,0.98);
+  z-index: 999;
+  flex-direction:column;
+  align-items:center; justify-content:center; gap:32px;
+}
+.mobile-menu.open { display:flex; }
+.mobile-menu a {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px; letter-spacing:4px;
+  color:var(--white); text-decoration:none; cursor:none;
+}
+.mobile-menu a:hover { color:var(--red); }
+
+/* PAGES */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ============ HOME PAGE ============ */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  text-align:center;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset:0;
+  background:
+    linear-gradient(to bottom, rgba(8,8,8,0.3) 0%, rgba(8,8,8,0.6) 60%, rgba(8,8,8,1) 100%),
+    radial-gradient(ellipse at center top, rgba(229,57,53,0.08) 0%, transparent 60%),
+    url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80') center/cover no-repeat;
+  animation: heroPan 20s ease-in-out infinite alternate;
+}
+@keyframes heroPan { from{transform:scale(1.05) translateX(-1%);} to{transform:scale(1.08) translateX(1%);} }
+
+.hero-particles {
+  position:absolute; inset:0; overflow:hidden; pointer-events:none;
+}
+.particle {
+  position:absolute;
+  width: 2px; height: 2px;
+  background: var(--red);
+  border-radius:50%;
+  animation: particleFloat linear infinite;
+  opacity:0;
+}
+@keyframes particleFloat {
+  0% { transform:translateY(100vh) translateX(0); opacity:0; }
+  10% { opacity:0.6; }
+  90% { opacity:0.3; }
+  100% { transform:translateY(-10vh) translateX(var(--dx,20px)); opacity:0; }
+}
+
+/* GPS Pulse rings */
+.gps-pulse {
+  position:absolute; bottom:15%; right:15%;
+  width:4px; height:4px; background:var(--red);
+  border-radius:50%;
+}
+.gps-pulse::before, .gps-pulse::after {
+  content:''; position:absolute;
+  border-radius:50%; border:1px solid rgba(229,57,53,0.4);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  animation: gpsPulse 2s ease-out infinite;
+}
+.gps-pulse::after { animation-delay:1s; }
+@keyframes gpsPulse {
+  0% { width:4px;height:4px;opacity:0.8; }
+  100% { width:80px;height:80px;opacity:0; }
+}
+
+.hero-content { position:relative; z-index:2; max-width:900px; padding:0 24px; }
+.hero-badge {
+  display:inline-block;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px; letter-spacing:5px; text-transform:uppercase;
+  color:var(--red); border:1px solid rgba(229,57,53,0.4);
+  padding:7px 18px; border-radius:2px;
+  margin-bottom:28px;
+  animation: fadeUp 1s ease forwards;
+  opacity:0; animation-delay:0.2s;
+}
+.hero-h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size: clamp(64px,10vw,140px);
+  line-height:0.92;
+  letter-spacing:4px;
+  animation: fadeUp 1s ease forwards;
+  opacity:0; animation-delay:0.4s;
+}
+.hero-h1 .accent { color:var(--red); }
+.hero-sub {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size: clamp(16px,2.5vw,22px);
+  letter-spacing:2px;
+  color: var(--light);
+  margin-top:20px;
+  text-transform:uppercase;
+  animation: fadeUp 1s ease forwards;
+  opacity:0; animation-delay:0.6s;
+}
+.hero-btns {
+  display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
+  margin-top:44px;
+  animation: fadeUp 1s ease forwards;
+  opacity:0; animation-delay:0.8s;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px);} to{opacity:1;transform:translateY(0);} }
+
+.btn-primary {
+  background: var(--red);
+  color: var(--white);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:14px; letter-spacing:3px; text-transform:uppercase;
+  padding:16px 36px; border:none; cursor:none;
+  border-radius:2px;
+  transition: all 0.25s;
+  text-decoration:none; display:inline-block;
+}
+.btn-primary:hover { background:#c62828; transform:translateY(-2px); box-shadow:0 12px 40px rgba(229,57,53,0.35); }
+.btn-outline {
+  background:transparent;
+  color:var(--white);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:14px; letter-spacing:3px; text-transform:uppercase;
+  padding:15px 36px; border:1px solid rgba(255,255,255,0.3); cursor:none;
+  border-radius:2px;
+  transition: all 0.25s;
+  text-decoration:none; display:inline-block;
+}
+.btn-outline:hover { border-color:var(--red); color:var(--red); transform:translateY(-2px); }
+
+.scroll-indicator {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  animation: fadeUp 1s ease forwards;
+  opacity:0; animation-delay:1.2s;
+}
+.scroll-indicator span {
+  font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:4px; color:var(--grey); text-transform:uppercase;
+}
+.scroll-line { width:1px; height:50px; background:linear-gradient(to bottom,var(--red),transparent); animation:scrollPulse 1.5s ease infinite; }
+@keyframes scrollPulse { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
+
+/* SECTION STRUCTURE */
+section { padding:100px 0; }
+.container { max-width:1200px; margin:0 auto; padding:0 40px; }
+.section-label {
+  font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:6px; text-transform:uppercase; color:var(--red);
+  margin-bottom:16px;
+}
+.section-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size: clamp(42px,6vw,80px);
+  line-height:0.95; letter-spacing:2px;
+}
+.section-sub {
+  font-size:16px; color:var(--grey); line-height:1.7; max-width:560px; margin-top:16px;
+}
+
+/* WHY CLUTCHX */
+.why-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.05);
+  margin-top:60px;
+}
+.why-card {
+  background:var(--carbon); padding:40px 32px;
+  transition: all 0.3s;
+  position:relative; overflow:hidden;
+}
+.why-card::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(229,57,53,0.06),transparent);
+  opacity:0; transition:opacity 0.3s;
+}
+.why-card:hover { background:var(--metal); }
+.why-card:hover::before { opacity:1; }
+.why-card:hover .why-icon { color:var(--red); }
+.why-icon { font-size:32px; margin-bottom:20px; transition:color 0.3s; }
+.why-title { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; letter-spacing:1px; margin-bottom:10px; }
+.why-desc { font-size:14px; color:var(--grey); line-height:1.7; }
+.why-accent { display:inline-block; width:24px; height:2px; background:var(--red); margin-top:20px; transition:width 0.3s; }
+.why-card:hover .why-accent { width:48px; }
+
+/* COMPARISON TABLE */
+.compare-wrap { overflow-x:auto; margin-top:60px; }
+table.compare {
+  width:100%; border-collapse:collapse;
+  font-family:'Barlow Condensed',sans-serif;
+}
+.compare thead tr { border-bottom:1px solid rgba(255,255,255,0.08); }
+.compare th { padding:20px 24px; font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--grey); text-align:center; }
+.compare th:first-child { text-align:left; }
+.compare th.highlight { color:var(--red); }
+.compare td { padding:18px 24px; font-size:15px; color:var(--light); text-align:center; border-bottom:1px solid rgba(255,255,255,0.04); }
+.compare td:first-child { text-align:left; color:var(--white); }
+.compare tr:hover td { background:rgba(255,255,255,0.02); }
+.check { color:var(--red); font-size:18px; }
+.cross { color:#444; font-size:18px; }
+.partial { color:#888; font-size:18px; }
+
+/* STATS */
+.stats-row {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.05);
+  margin-top:80px;
+}
+.stat-item { background:var(--carbon); padding:48px 32px; text-align:center; }
+.stat-num {
+  font-family:'Bebas Neue',sans-serif; font-size:clamp(48px,6vw,80px);
+  color:var(--white); line-height:1;
+}
+.stat-num span { color:var(--red); }
+.stat-label { font-family:'Barlow Condensed',sans-serif; font-size:13px; letter-spacing:3px; text-transform:uppercase; color:var(--grey); margin-top:8px; }
+
+/* FEATURES */
+.features-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:1px;
+  background:rgba(255,255,255,0.05);
+  margin-top:60px;
+}
+.feature-card {
+  background:var(--carbon); padding:48px 40px;
+  position:relative; overflow:hidden;
+  transition:all 0.35s;
+  cursor:none;
+}
+.feature-card::after {
+  content:''; position:absolute; bottom:0; left:0; width:0; height:2px;
+  background:var(--red); transition:width 0.35s;
+}
+.feature-card:hover { background:var(--metal); transform:translateY(-4px); }
+.feature-card:hover::after { width:100%; }
+.feat-num { font-family:'Bebas Neue',sans-serif; font-size:72px; color:rgba(255,255,255,0.05); line-height:1; margin-bottom:-10px; }
+.feat-icon { font-size:36px; margin-bottom:20px; }
+.feat-title { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:700; letter-spacing:1px; margin-bottom:12px; }
+.feat-desc { font-size:14px; color:var(--grey); line-height:1.7; }
+
+/* LIVE MAP */
+.map-container {
+  position:relative; height:70vh; min-height:500px;
+  background: radial-gradient(ellipse at center, #0d1a0d 0%, #080808 70%);
+  overflow:hidden; margin-top:60px;
+  border:1px solid rgba(255,255,255,0.05);
+}
+.map-grid {
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(0,255,0,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,0,0.04) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.map-radar {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:300px; height:300px;
+  border:1px solid rgba(229,57,53,0.15); border-radius:50%;
+  animation:radarSpin 4s linear infinite;
+}
+.map-radar::before {
+  content:''; position:absolute; inset:-60px;
+  border:1px solid rgba(229,57,53,0.08); border-radius:50%;
+}
+.map-radar::after {
+  content:''; position:absolute; inset:60px;
+  border:1px solid rgba(229,57,53,0.25); border-radius:50%;
+}
+@keyframes radarSpin { to{transform:translate(-50%,-50%) rotate(360deg);} }
+.radar-sweep {
+  position:absolute; top:50%; left:50%;
+  width:150px; height:2px;
+  background:linear-gradient(to right,rgba(229,57,53,0.8),transparent);
+  transform-origin:left center;
+  animation:sweep 4s linear infinite;
+}
+@keyframes sweep { to{transform:rotate(360deg);} }
+.map-pin {
+  position:absolute;
+  width:10px; height:10px;
+  background:var(--red); border-radius:50%;
+  box-shadow:0 0 12px rgba(229,57,53,0.8);
+  animation:pingMap 2s ease infinite;
+}
+.map-pin::before {
+  content:''; position:absolute;
+  border-radius:50%; border:1px solid rgba(229,57,53,0.5);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:gpsPulse 2s ease-out infinite;
+}
+@keyframes pingMap { 0%,100%{box-shadow:0 0 8px rgba(229,57,53,0.6);} 50%{box-shadow:0 0 20px rgba(229,57,53,0.9);} }
+.map-label {
+  position:absolute; transform:translate(14px,-50%);
+  font-family:'Barlow Condensed',sans-serif; font-size:12px; letter-spacing:1px; color:var(--light);
+  background:rgba(8,8,8,0.85); padding:4px 10px; border-radius:2px; white-space:nowrap;
+  border-left:2px solid var(--red);
+}
+.map-overlay {
+  position:absolute; top:0; left:0; bottom:0; width:300px;
+  background:rgba(8,8,8,0.9); backdrop-filter:blur(10px);
+  padding:32px 28px; border-right:1px solid rgba(255,255,255,0.05);
+  overflow-y:auto;
+}
+.map-overlay h3 { font-family:'Barlow Condensed',sans-serif; font-size:13px; letter-spacing:4px; text-transform:uppercase; color:var(--grey); margin-bottom:24px; }
+.rider-item {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.rider-avatar {
+  width:38px; height:38px; border-radius:50%;
+  background:var(--metal); display:flex;align-items:center;justify-content:center;
+  font-size:16px; flex-shrink:0;
+  border:2px solid var(--red);
+}
+.rider-info { flex:1; min-width:0; }
+.rider-name { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:600; }
+.rider-bike { font-size:12px; color:var(--grey); }
+.rider-dist { font-family:'Barlow Condensed',sans-serif; font-size:13px; color:var(--red); letter-spacing:1px; }
+.online-dot { width:8px;height:8px;background:#22c55e;border-radius:50;flex-shrink:0; box-shadow:0 0 6px rgba(34,197,94,0.8); }
+
+/* SOS PAGE */
+.sos-hero {
+  min-height:70vh; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at center, rgba(229,57,53,0.12) 0%, transparent 70%);
+  text-align:center; padding:100px 24px 60px;
+  position:relative; overflow:hidden;
+}
+.sos-ring {
+  position:absolute; top:50%;left:50%;transform:translate(-50%,-50%);
+  border-radius:50%; border:1px solid rgba(229,57,53,0.15);
+  animation:sosExpand 3s ease-out infinite;
+}
+@keyframes sosExpand {
+  0%{width:100px;height:100px;opacity:0.8;}
+  100%{width:800px;height:800px;opacity:0;}
+}
+.sos-btn-demo {
+  width:140px;height:140px; border-radius:50%;
+  background:var(--red); border:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:none; margin:48px auto;
+  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:3px; color:var(--white);
+  box-shadow:0 0 60px rgba(229,57,53,0.5), 0 0 120px rgba(229,57,53,0.2);
+  animation:sosPulse 2s ease infinite;
+  transition:transform 0.2s;
+}
+.sos-btn-demo:hover { transform:scale(1.05); }
+.sos-btn-demo span { font-size:11px; letter-spacing:2px; opacity:0.7; margin-top:4px; }
+@keyframes sosPulse { 0%,100%{box-shadow:0 0 40px rgba(229,57,53,0.4);} 50%{box-shadow:0 0 80px rgba(229,57,53,0.7);} }
+.sos-features {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px;
+  margin-top:60px;
+}
+.sos-card {
+  background:rgba(229,57,53,0.05); border:1px solid rgba(229,57,53,0.15);
+  padding:32px 28px; border-radius:4px;
+  transition:all 0.3s;
+}
+.sos-card:hover { background:rgba(229,57,53,0.1); border-color:rgba(229,57,53,0.4); transform:translateY(-4px); }
+.sos-card .icon { font-size:28px; margin-bottom:16px; }
+.sos-card h4 { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; margin-bottom:8px; }
+.sos-card p { font-size:13px; color:var(--grey); line-height:1.6; }
+
+/* TRIPS */
+.trips-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;
+  margin-top:60px;
+}
+.trip-card {
+  position:relative; border-radius:4px; overflow:hidden;
+  height:380px; cursor:none;
+  transition:transform 0.35s;
+}
+.trip-card:hover { transform:translateY(-8px); }
+.trip-bg {
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  transition:transform 0.4s;
+}
+.trip-card:hover .trip-bg { transform:scale(1.06); }
+.trip-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(8,8,8,0.95) 0%, rgba(8,8,8,0.4) 60%, transparent 100%);
+}
+.trip-content { position:absolute; bottom:0; left:0; right:0; padding:28px; }
+.trip-tag { font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--red); margin-bottom:8px; }
+.trip-name { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:2px; }
+.trip-meta { display:flex; align-items:center; gap:16px; margin-top:12px; }
+.trip-riders { font-family:'Barlow Condensed',sans-serif; font-size:13px; color:var(--grey); }
+.trip-riders strong { color:var(--white); }
+.trip-join { background:var(--red); color:var(--white); border:none; padding:8px 20px; font-family:'Barlow Condensed',sans-serif; font-size:13px; letter-spacing:2px; text-transform:uppercase; cursor:none; border-radius:2px; transition:background 0.2s; }
+.trip-join:hover { background:#c62828; }
+
+/* FEED */
+.feed-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;
+  margin-top:60px;
+}
+.reel-card {
+  position:relative; border-radius:4px; overflow:hidden;
+  background:var(--carbon); cursor:none;
+  transition:transform 0.3s;
+}
+.reel-card:hover { transform:translateY(-4px); }
+.reel-thumb {
+  width:100%; aspect-ratio:9/14;
+  background-size:cover; background-position:center;
+  position:relative;
+}
+.reel-play {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.3); opacity:0; transition:opacity 0.25s;
+}
+.reel-card:hover .reel-play { opacity:1; }
+.play-btn {
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(229,57,53,0.9); display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+.reel-info { padding:16px; }
+.reel-user { display:flex;align-items:center;gap:10px; margin-bottom:10px; }
+.reel-avatar { width:32px;height:32px;border-radius:50%;background:var(--metal);display:flex;align-items:center;justify-content:center;font-size:14px; border:1.5px solid var(--red); }
+.reel-username { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:600; }
+.reel-caption { font-size:13px; color:var(--grey); line-height:1.5; }
+.reel-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.tag { font-family:'Barlow Condensed',sans-serif; font-size:11px; color:var(--red); letter-spacing:1px; }
+.reel-actions { display:flex;gap:16px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.05); }
+.reel-action { font-family:'Barlow Condensed',sans-serif; font-size:13px; color:var(--grey); display:flex;align-items:center;gap:5px; cursor:none; transition:color 0.2s; }
+.reel-action:hover { color:var(--red); }
+
+/* INVESTOR */
+.investor-hero {
+  background: radial-gradient(ellipse at top, rgba(229,57,53,0.08) 0%, transparent 60%);
+  padding-top:140px;
+}
+.metrics-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.06);
+  margin:60px 0;
+}
+.metric-card { background:var(--carbon); padding:40px 32px; text-align:center; }
+.metric-num { font-family:'Bebas Neue',sans-serif; font-size:clamp(36px,5vw,60px); color:var(--red); line-height:1; }
+.metric-label { font-family:'Barlow Condensed',sans-serif; font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--grey); margin-top:8px; }
+.roadmap { margin-top:60px; }
+.roadmap-item {
+  display:flex; gap:32px; margin-bottom:32px; align-items:flex-start;
+  padding-bottom:32px; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.roadmap-phase {
+  flex-shrink:0; width:100px;
+  font-family:'Bebas Neue',sans-serif; font-size:48px; color:rgba(229,57,53,0.2); line-height:1;
+}
+.roadmap-content h4 { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; margin-bottom:8px; }
+.roadmap-content p { font-size:14px; color:var(--grey); line-height:1.7; }
+.team-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px;
+  margin-top:60px;
+}
+.team-card {
+  background:var(--carbon); border:1px solid rgba(255,255,255,0.05);
+  padding:32px 28px; border-radius:4px; text-align:center;
+  transition:all 0.3s;
+}
+.team-card:hover { border-color:rgba(229,57,53,0.3); transform:translateY(-4px); }
+.team-avatar {
+  width:72px;height:72px;border-radius:50%;background:var(--metal);
+  margin:0 auto 20px; display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:2px;
+  border:2px solid var(--red); color:var(--red);
+}
+.team-name { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; margin-bottom:4px; }
+.team-role { font-size:13px; color:var(--red); margin-bottom:8px; letter-spacing:1px; }
+.team-bio { font-size:12px; color:var(--grey); line-height:1.6; }
+.team-bike { font-size:12px; color:var(--grey); margin-top:10px; }
+
+/* CAREERS */
+.jobs-list { margin-top:60px; display:flex; flex-direction:column; gap:1px; }
+.job-item {
+  background:var(--carbon); padding:32px 40px;
+  display:flex; align-items:center; justify-content:space-between; gap:24px;
+  border-left:3px solid transparent;
+  transition:all 0.3s; cursor:none;
+}
+.job-item:hover { background:var(--metal); border-left-color:var(--red); transform:translateX(4px); }
+.job-title { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:700; margin-bottom:6px; }
+.job-meta { display:flex;gap:16px; font-size:13px; color:var(--grey); flex-wrap:wrap; }
+.job-tag { background:rgba(229,57,53,0.1); color:var(--red); padding:3px 10px; border-radius:2px; font-size:11px; letter-spacing:1px; }
+
+/* BLOGS */
+.blog-grid {
+  display:grid; grid-template-columns:2fr 1fr; gap:24px;
+  margin-top:60px;
+}
+.blog-featured {
+  position:relative; border-radius:4px; overflow:hidden; height:480px; cursor:none;
+}
+.blog-featured .blog-img {
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  transition:transform 0.4s;
+}
+.blog-featured:hover .blog-img { transform:scale(1.04); }
+.blog-featured .blog-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(8,8,8,0.95), transparent 60%);
+}
+.blog-featured .blog-content { position:absolute; bottom:0; left:0; right:0; padding:36px; }
+.blog-small-list { display:flex;flex-direction:column;gap:1px; }
+.blog-small {
+  background:var(--carbon); padding:24px;
+  display:flex; gap:16px; cursor:none;
+  transition:background 0.25s;
+}
+.blog-small:hover { background:var(--metal); }
+.blog-small-img { width:80px;height:80px;border-radius:2px;background-size:cover;background-position:center;flex-shrink:0; }
+.blog-cat { font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--red); margin-bottom:6px; }
+.blog-title { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; line-height:1.3; }
+.blog-small .blog-title { font-size:15px; }
+.blog-date { font-size:12px; color:var(--grey); margin-top:6px; }
+
+/* WAITLIST */
+.waitlist-hero { text-align:center; padding:140px 24px 60px; }
+.waitlist-form {
+  max-width:600px; margin:60px auto 0;
+  background:var(--carbon); border:1px solid rgba(255,255,255,0.06);
+  padding:48px; border-radius:4px;
+}
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.form-group { margin-bottom:20px; }
+.form-group label { display:block; font-family:'Barlow Condensed',sans-serif; font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--grey); margin-bottom:8px; }
+.form-group input, .form-group select {
+  width:100%; background:var(--metal); border:1px solid rgba(255,255,255,0.08);
+  color:var(--white); padding:14px 16px; border-radius:2px;
+  font-family:'Barlow',sans-serif; font-size:15px; outline:none;
+  transition:border-color 0.25s;
+}
+.form-group input:focus, .form-group select:focus { border-color:var(--red); }
+.form-group select option { background:var(--carbon); }
+.form-group.full { grid-column:1/-1; }
+.success-popup {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.85); z-index:5000;
+  align-items:center; justify-content:center;
+}
+.success-popup.show { display:flex; }
+.success-box {
+  background:var(--carbon); border:1px solid rgba(229,57,53,0.3);
+  padding:60px; border-radius:4px; text-align:center; max-width:400px;
+}
+.success-icon { font-size:64px; margin-bottom:24px; }
+.success-box h3 { font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:3px; margin-bottom:12px; }
+.success-box p { color:var(--grey); font-size:15px; line-height:1.6; }
+.success-close { margin-top:32px; }
+
+/* ABOUT */
+.about-intro { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; margin-top:60px; }
+.about-visual {
+  position:relative; height:500px;
+  background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80') center/cover;
+  border-radius:2px; overflow:hidden;
+}
+.about-visual::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(229,57,53,0.2),transparent);
+}
+.about-text h2 { font-family:'Bebas Neue',sans-serif; font-size:clamp(36px,5vw,64px); line-height:0.95; letter-spacing:2px; margin-bottom:24px; }
+.about-text p { font-size:16px; color:var(--grey); line-height:1.8; margin-bottom:20px; }
+.about-values { display:flex;flex-direction:column;gap:16px; margin-top:32px; }
+.value-item { display:flex;gap:16px;align-items:flex-start; }
+.value-dot { width:3px;height:3px;background:var(--red);border-radius:50%;margin-top:8px;flex-shrink:0; }
+.value-text { font-family:'Barlow Condensed',sans-serif; font-size:16px; color:var(--light); }
+
+/* FAQ */
+.faq-list { max-width:800px; margin:60px auto 0; }
+.faq-item { border-bottom:1px solid rgba(255,255,255,0.06); }
+.faq-q {
+  width:100%; background:none; border:none; color:var(--white);
+  font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:600;
+  text-align:left; padding:24px 0; cursor:none;
+  display:flex; justify-content:space-between; align-items:center;
+  transition:color 0.2s;
+}
+.faq-q:hover { color:var(--red); }
+.faq-icon { font-size:20px; color:var(--red); transition:transform 0.3s; flex-shrink:0; }
+.faq-item.open .faq-icon { transform:rotate(45deg); }
+.faq-a { font-size:15px; color:var(--grey); line-height:1.7; max-height:0; overflow:hidden; transition:max-height 0.4s ease, padding 0.3s; }
+.faq-item.open .faq-a { max-height:300px; padding-bottom:24px; }
+
+/* CONTACT */
+.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; margin-top:60px; }
+.contact-info h3 { font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:2px; margin-bottom:24px; }
+.contact-item { display:flex;gap:16px;margin-bottom:28px;align-items:flex-start; }
+.contact-icon { font-size:22px; margin-top:2px; }
+.contact-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--grey); margin-bottom:4px; }
+.contact-val { font-size:16px; color:var(--white); }
+.contact-form { background:var(--carbon); border:1px solid rgba(255,255,255,0.06); padding:40px; border-radius:4px; }
+
+/* DOWNLOAD */
+.download-hero {
+  min-height:90vh; display:flex;align-items:center;
+  background:radial-gradient(ellipse at center, rgba(229,57,53,0.1) 0%, transparent 65%);
+  padding:120px 40px 80px;
+}
+.download-content { max-width:600px; }
+.download-content h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(56px,8vw,100px); line-height:0.92; letter-spacing:3px; margin-bottom:24px; }
+.download-content p { font-size:17px; color:var(--grey); line-height:1.7; margin-bottom:40px; max-width:480px; }
+.store-btns { display:flex;gap:16px;flex-wrap:wrap; }
+.store-btn {
+  display:flex;align-items:center;gap:14px;
+  background:var(--metal); border:1px solid rgba(255,255,255,0.1);
+  padding:14px 24px; border-radius:6px; cursor:none;
+  transition:all 0.25s; text-decoration:none; color:var(--white);
+}
+.store-btn:hover { border-color:var(--red); transform:translateY(-3px); }
+.store-icon { font-size:28px; }
+.store-text span { display:block; font-size:11px; color:var(--grey); letter-spacing:1px; }
+.store-text strong { font-size:16px; font-weight:600; }
+.phone-mockup {
+  position:relative; margin-left:auto; margin-right:80px;
+  width:260px; height:520px;
+  background:var(--metal); border-radius:36px;
+  border:3px solid rgba(255,255,255,0.1);
+  box-shadow:0 40px 80px rgba(0,0,0,0.6), 0 0 80px rgba(229,57,53,0.1);
+  display:flex;align-items:center;justify-content:center; flex-direction:column;
+  animation:phoneFloat 4s ease-in-out infinite;
+  overflow:hidden;
+}
+@keyframes phoneFloat { 0%,100%{transform:translateY(0) rotate(-2deg);} 50%{transform:translateY(-20px) rotate(2deg);} }
+.phone-screen {
+  position:absolute; inset:8px;
+  background:var(--carbon); border-radius:30px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px; text-align:center;
+}
+.phone-logo { font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:4px; }
+.phone-logo span { color:var(--red); }
+
+/* CLUBS */
+.clubs-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; margin-top:60px; }
+.club-card {
+  background:var(--carbon); border:1px solid rgba(255,255,255,0.05);
+  padding:32px 28px; border-radius:4px; cursor:none;
+  transition:all 0.3s;
+}
+.club-card:hover { border-color:rgba(229,57,53,0.3); transform:translateY(-4px); }
+.club-badge { font-size:40px; margin-bottom:16px; }
+.club-name { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px; margin-bottom:8px; }
+.club-city { font-family:'Barlow Condensed',sans-serif; font-size:13px; letter-spacing:3px; text-transform:uppercase; color:var(--red); margin-bottom:12px; }
+.club-desc { font-size:14px; color:var(--grey); line-height:1.6; margin-bottom:20px; }
+.club-members { font-family:'Barlow Condensed',sans-serif; font-size:13px; color:var(--grey); }
+.club-members strong { color:var(--white); font-size:18px; }
+
+/* LEGAL */
+.legal-content { max-width:800px; margin:80px auto 0; }
+.legal-content h2 { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:700; margin:40px 0 16px; color:var(--white); }
+.legal-content p { font-size:15px; color:var(--grey); line-height:1.8; margin-bottom:16px; }
+.legal-content ul { margin:16px 0 20px 24px; }
+.legal-content li { font-size:15px; color:var(--grey); line-height:1.7; margin-bottom:8px; }
+
+/* FOOTER */
+footer {
+  background:var(--carbon); border-top:1px solid rgba(255,255,255,0.05);
+  padding:80px 0 40px;
+  position:relative; overflow:hidden;
+}
+footer::before {
+  content:''; position:absolute; top:-100px; left:50%; transform:translateX(-50%);
+  width:600px; height:200px;
+  background:radial-gradient(ellipse, rgba(229,57,53,0.06) 0%, transparent 70%);
+}
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:60px; }
+.footer-brand .logo { font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:4px; margin-bottom:16px; }
+.footer-brand .logo span { color:var(--red); }
+.footer-brand p { font-size:14px; color:var(--grey); line-height:1.7; max-width:300px; }
+.social-links { display:flex;gap:12px; margin-top:24px; }
+.social-link {
+  width:40px;height:40px;border-radius:50%;
+  background:var(--metal); border:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  cursor:none; transition:all 0.25s; text-decoration:none;
+}
+.social-link:hover { background:var(--red); border-color:var(--red); }
+.footer-col h5 { font-family:'Barlow Condensed',sans-serif; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--grey); margin-bottom:20px; }
+.footer-col a { display:block; font-size:14px; color:var(--light); text-decoration:none; margin-bottom:12px; cursor:none; transition:color 0.2s; }
+.footer-col a:hover { color:var(--red); }
+.footer-bottom { margin-top:60px; padding-top:32px; border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+.footer-bottom p { font-size:13px; color:var(--grey); }
+.footer-flag { font-size:18px; }
+
+/* FLOATING DL BTN */
+.floating-dl {
+  position:fixed; bottom:32px; right:32px; z-index:900;
+  background:var(--red); color:var(--white);
+  font-family:'Barlow Condensed',sans-serif; font-size:13px; letter-spacing:2px; text-transform:uppercase;
+  padding:14px 24px; border-radius:3px; border:none; cursor:none;
+  box-shadow:0 8px 32px rgba(229,57,53,0.4);
+  animation:floatBtn 3s ease-in-out infinite;
+  transition:all 0.2s;
+}
+.floating-dl:hover { background:#c62828; transform:scale(1.05); }
+@keyframes floatBtn { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+
+/* PAGE TRANSITION */
+.page-transition {
+  position:fixed; inset:0; background:var(--black); z-index:9999;
+  pointer-events:none; opacity:0; transition:opacity 0.25s;
+}
+.page-transition.active { opacity:1; pointer-events:all; }
+
+/* DIVIDER */
+.divider { width:60px; height:2px; background:var(--red); margin:24px 0; }
+.divider-center { margin-left:auto; margin-right:auto; }
+
+/* RESPONSIVE */
+@media(max-width:900px) {
+  nav { padding:16px 24px; }
+  nav.scrolled { padding:12px 24px; }
+  .nav-links { display:none; }
+  .hamburger { display:flex; }
+  .hero-h1 { font-size:clamp(48px,12vw,80px); }
+  .stats-row { grid-template-columns:1fr 1fr; }
+  .footer-grid { grid-template-columns:1fr 1fr; }
+  .about-intro { grid-template-columns:1fr; }
+  .blog-grid { grid-template-columns:1fr; }
+  .contact-grid { grid-template-columns:1fr; }
+  .download-hero { flex-direction:column; }
+  .phone-mockup { margin:40px auto 0; }
+  .form-grid { grid-template-columns:1fr; }
+  .container { padding:0 24px; }
+  section { padding:70px 0; }
+}
+@media(max-width:600px) {
+  .stats-row { grid-template-columns:1fr; }
+  .footer-grid { grid-template-columns:1fr; gap:40px; }
+  .hero-btns { flex-direction:column; align-items:center; }
+}
+
+/* REVEAL ANIMATION */
+.reveal { opacity:0; transform:translateY(40px); transition:opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">CLUTCH<span style="color:var(--red)">X</span></div>
+  <div class="loader-tag">Ride • Connect • Brotherhood</div>
+  <div class="loader-bar"><div class="loader-progress"></div></div>
+</div>
+
+<!-- PAGE TRANSITION -->
+<div class="page-transition" id="pageTransition"></div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#" class="nav-logo" onclick="showPage('home')">CLUTCH<span>X</span></a>
+  <ul class="nav-links">
+    <li><a href="#" onclick="showPage('home');return false">Home</a></li>
+    <li><a href="#" onclick="showPage('features');return false">Features</a></li>
+    <li><a href="#" onclick="showPage('map');return false">Rider Map</a></li>
+    <li><a href="#" onclick="showPage('trips');return false">Trips</a></li>
+    <li><a href="#" onclick="showPage('sos');return false">Safety</a></li>
+    <li><a href="#" onclick="showPage('feed');return false">Explore</a></li>
+    <li><a href="#" onclick="showPage('about');return false">About</a></li>
+    <li><a href="#" onclick="showPage('investors');return false">Investors</a></li>
+    <li><a href="#" onclick="showPage('blogs');return false">Blogs</a></li>
+    <li><a href="#" onclick="showPage('contact');return false">Contact</a></li>
+    <li><a href="#" class="nav-cta" onclick="showPage('download');return false">Download App</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleMobile()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#" onclick="showPage('home');toggleMobile()">Home</a>
+  <a href="#" onclick="showPage('features');toggleMobile()">Features</a>
+  <a href="#" onclick="showPage('map');toggleMobile()">Rider Map</a>
+  <a href="#" onclick="showPage('trips');toggleMobile()">Trips</a>
+  <a href="#" onclick="showPage('sos');toggleMobile()">Safety / SOS</a>
+  <a href="#" onclick="showPage('feed');toggleMobile()">Explore Feed</a>
+  <a href="#" onclick="showPage('about');toggleMobile()">About</a>
+  <a href="#" onclick="showPage('investors');toggleMobile()">Investors</a>
+  <a href="#" onclick="showPage('careers');toggleMobile()">Careers</a>
+  <a href="#" onclick="showPage('blogs');toggleMobile()">Blogs</a>
+  <a href="#" onclick="showPage('clubs');toggleMobile()">Rider Clubs</a>
+  <a href="#" onclick="showPage('waitlist');toggleMobile()">Join Waitlist</a>
+  <a href="#" onclick="showPage('download');toggleMobile()" style="color:var(--red)">Download App</a>
+</div>
+
+<!-- FLOATING DOWNLOAD BUTTON -->
+<button class="floating-dl" onclick="showPage('download')">⬇ Download App</button>
+
+<!-- ===== HOME PAGE ===== -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-particles" id="particles"></div>
+    <div class="gps-pulse"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🇮🇳 India's First Moto-Social Network</div>
+      <h1 class="hero-h1">RIDE.<br><span class="accent">CONNECT.</span><br>BROTHERHOOD.</h1>
+      <p class="hero-sub">India's First Moto-Social Platform Built For Riders.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showPage('waitlist')">Join Waitlist</button>
+        <button class="btn-outline" onclick="showPage('features')">Explore Features</button>
+        <button class="btn-outline" onclick="openVideo()">▶ Watch Demo</button>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-row reveal" style="margin:0">
+    <div class="stat-item">
+      <div class="stat-num">230<span>M</span></div>
+      <div class="stat-label">Motorcycles in India</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">21<span>M</span></div>
+      <div class="stat-label">New Bikes Sold / Year</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Dedicated Moto-Social Apps</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">₹8.4<span>K</span>Cr</div>
+      <div class="stat-label">Addressable Ad Market</div>
+    </div>
+  </div>
+
+  <!-- WHY CLUTCHX -->
+  <section>
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Why ClutchX</div>
+        <h2 class="section-title">RIDERS DESERVE<br>BETTER THAN<br><span style="color:var(--red)">WHATSAPP GROUPS.</span></h2>
+        <p class="section-sub">230 million motorcycles on Indian roads. Zero dedicated social infrastructure. Until now.</p>
+      </div>
+      <div class="why-grid reveal">
+        <div class="why-card">
+          <div class="why-icon">🗺️</div>
+          <div class="why-title">Live Rider Map</div>
+          <div class="why-desc">See all online riders near you in real time. Find riding buddies, plan spontaneous rides, never ride alone.</div>
+          <div class="why-accent"></div>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🆘</div>
+          <div class="why-title">Emergency SOS</div>
+          <div class="why-desc">Hold to broadcast emergency to all riders within 25km. The feature that can save your life on an empty highway.</div>
+          <div class="why-accent"></div>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🏍️</div>
+          <div class="why-title">Group Trips</div>
+          <div class="why-desc">Plan, join and co-ordinate multi-day rides. Auto-created group chats, shared routes, split expenses.</div>
+          <div class="why-accent"></div>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">📱</div>
+          <div class="why-title">Moto Reels</div>
+          <div class="why-desc">Ride reels, trip photos, route reviews — a community feed built exclusively for the riding world.</div>
+          <div class="why-accent"></div>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">📍</div>
+          <div class="why-title">Route Tracking</div>
+          <div class="why-desc">Auto-record every ride with stats, elevation, speed, and replay. Show your route to the world.</div>
+          <div class="why-accent"></div>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🛡️</div>
+          <div class="why-title">Crash Detection AI</div>
+          <div class="why-desc">AI-powered crash detection alerts your emergency contacts and nearby riders automatically.</div>
+          <div class="why-accent"></div>
+        </div>
+      </div>
+
+      <!-- COMPARISON TABLE -->
+      <div class="compare-wrap reveal" style="margin-top:80px">
+        <div class="section-label">Competitive Landscape</div>
+        <h2 class="section-title" style="font-size:clamp(32px,4vw,56px)">WE WIN ON EVERY<br><span style="color:var(--red)">DIMENSION.</span></h2>
+        <div style="overflow-x:auto;margin-top:40px">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="highlight">ClutchX</th>
+              <th>WhatsApp</th>
+              <th>REVER</th>
+              <th>Strava</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>India-First Focus</td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td></tr>
+            <tr><td>Live Rider Map</td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td><td><span class="partial">~</span></td><td><span class="cross">✗</span></td></tr>
+            <tr><td>SOS Emergency Network</td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td></tr>
+            <tr><td>Crash Detection AI</td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td></tr>
+            <tr><td>Group Trip Planning</td><td><span class="check">✓</span></td><td><span class="partial">~</span></td><td><span class="partial">~</span></td><td><span class="cross">✗</span></td></tr>
+            <tr><td>Moto-Only Social Feed</td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td></tr>
+            <tr><td>Free for Riders</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td><td><span class="partial">~</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA STRIP -->
+  <div style="background:var(--red);padding:80px 40px;text-align:center" class="reveal">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,5vw,64px);letter-spacing:3px;margin-bottom:20px">THE MARKET IS OPEN.<br>THE TIMING IS NOW.</div>
+    <p style="font-size:16px;opacity:0.85;max-width:560px;margin:0 auto 32px;line-height:1.7">EatSleepRIDE shut down in 2025. 800K+ riders worldwide need a new home. India's gap is the biggest.</p>
+    <button class="btn-outline" onclick="showPage('waitlist')" style="border-color:rgba(255,255,255,0.5);color:white">Claim Your Spot Today</button>
+  </div>
+
+</div>
+<!-- END HOME -->
+
+<!-- ===== FEATURES PAGE ===== -->
+<div class="page" id="page-features">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Product</div>
+        <h1 class="section-title">EVERYTHING A RIDER<br>NEEDS. IN <span style="color:var(--red)">ONE APP.</span></h1>
+        <div class="divider"></div>
+        <p class="section-sub">Designed for the road. Built India-first. Ten features that make ClutchX the only app a rider needs.</p>
+      </div>
+      <div class="features-grid reveal">
+        <div class="feature-card"><div class="feat-num">01</div><div class="feat-icon">🗺️</div><div class="feat-title">Live GPS Map</div><div class="feat-desc">See every online rider near you in real time. Filter by distance, bike type, or riding style. Tap to connect instantly.</div></div>
+        <div class="feature-card"><div class="feat-num">02</div><div class="feat-icon">🆘</div><div class="feat-title">Emergency SOS</div><div class="feat-desc">Hold 3 seconds to broadcast emergency to all riders within 25km. Live location shared. Response in minutes, not hours.</div></div>
+        <div class="feature-card"><div class="feat-num">03</div><div class="feat-icon">🏕️</div><div class="feat-title">Group Trips</div><div class="feat-desc">Plan, create and join multi-day rides. Auto group chats, route sharing, expense splitting, and live convoy tracking.</div></div>
+        <div class="feature-card"><div class="feat-num">04</div><div class="feat-icon">💬</div><div class="feat-title">Community Chat</div><div class="feat-desc">Trip-specific group chats created automatically. Rider-only spaces. No noise, no spam — just the brotherhood.</div></div>
+        <div class="feature-card"><div class="feat-num">05</div><div class="feat-icon">🎬</div><div class="feat-title">Explore Feed</div><div class="feat-desc">Moto reels, ride photos, route reviews, bike setups — a social feed curated entirely for the riding world.</div></div>
+        <div class="feature-card"><div class="feat-num">06</div><div class="feat-icon">📊</div><div class="feat-title">Ride Tracking</div><div class="feat-desc">Auto-record every ride. Distance, speed, elevation, route replay. Share your stats or keep them private.</div></div>
+        <div class="feature-card"><div class="feat-num">07</div><div class="feat-icon">🤖</div><div class="feat-title">Crash Detection AI</div><div class="feat-desc">AI detects sudden impact patterns. Alerts emergency contacts and nearby riders automatically within seconds.</div></div>
+        <div class="feature-card"><div class="feat-num">08</div><div class="feat-icon">⛽</div><div class="feat-title">Fuel Stop Finder</div><div class="feat-desc">Community-tagged fuel stops, dhabas, and rest points on all major Indian highway and mountain routes.</div></div>
+        <div class="feature-card"><div class="feat-num">09</div><div class="feat-icon">🛣️</div><div class="feat-title">Route Sharing</div><div class="feat-desc">Save and share your favourite routes. Import GPX, export to navigation, and discover community-curated paths.</div></div>
+        <div class="feature-card"><div class="feat-num">10</div><div class="feat-icon">🎥</div><div class="feat-title">Moto Reels</div><div class="feat-desc">Short-form video for the riding world. Vertical reels, ride stories, adventure logs — your life on two wheels.</div></div>
+      </div>
+      <div class="reveal" style="text-align:center;margin-top:80px">
+        <p style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--grey);margin-bottom:24px">Ready to ride with the brotherhood?</p>
+        <button class="btn-primary" onclick="showPage('waitlist')">Join the Waitlist</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== MAP PAGE ===== -->
+<div class="page" id="page-map">
+  <section style="padding-top:120px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Live Rider Map</div>
+        <h1 class="section-title">EVERY RIDER.<br><span style="color:var(--red)">IN REAL TIME.</span></h1>
+        <div class="divider"></div>
+        <p class="section-sub">See who's riding near you right now. Online status, bike model, distance — everything at a glance.</p>
+      </div>
+    </div>
+    <div class="container" style="max-width:100%;padding:0">
+    <div class="map-container reveal">
+      <div class="map-grid"></div>
+      <div class="map-radar">
+        <div class="radar-sweep"></div>
+      </div>
+      <!-- Pins -->
+      <div class="map-pin" style="top:30%;left:45%"><div class="map-label">Arjun K • KTM 390 • 2.3km</div></div>
+      <div class="map-pin" style="top:55%;left:62%"><div class="map-label">Rahul M • RE Himalayan • 4.1km</div></div>
+      <div class="map-pin" style="top:40%;left:30%"><div class="map-label">Vikram S • Ducati S • 6.7km</div></div>
+      <div class="map-pin" style="top:70%;left:40%"><div class="map-label">Priya D • Ninja 400 • 8.2km</div></div>
+      <div class="map-pin" style="top:25%;left:70%"><div class="map-label">Dev A • Dominar • 11km</div></div>
+      <!-- Sidebar -->
+      <div class="map-overlay">
+        <h3>Nearby Riders</h3>
+        <div class="rider-item">
+          <div class="rider-avatar">🏍️</div>
+          <div class="rider-info"><div class="rider-name">Arjun Kaul</div><div class="rider-bike">KTM Duke 390</div></div>
+          <div><div class="online-dot" style="border-radius:50%"></div><div class="rider-dist" style="margin-top:4px">2.3km</div></div>
+        </div>
+        <div class="rider-item">
+          <div class="rider-avatar">🛵</div>
+          <div class="rider-info"><div class="rider-name">Rahul Mehta</div><div class="rider-bike">RE Himalayan 450</div></div>
+          <div><div class="online-dot" style="border-radius:50%"></div><div class="rider-dist" style="margin-top:4px">4.1km</div></div>
+        </div>
+        <div class="rider-item">
+          <div class="rider-avatar">🏁</div>
+          <div class="rider-info"><div class="rider-name">Vikram Singh</div><div class="rider-bike">Ducati Scrambler</div></div>
+          <div><div class="online-dot" style="border-radius:50%"></div><div class="rider-dist" style="margin-top:4px">6.7km</div></div>
+        </div>
+        <div class="rider-item">
+          <div class="rider-avatar">🌟</div>
+          <div class="rider-info"><div class="rider-name">Priya Dixit</div><div class="rider-bike">Kawasaki Ninja 400</div></div>
+          <div><div class="online-dot" style="border-radius:50%"></div><div class="rider-dist" style="margin-top:4px">8.2km</div></div>
+        </div>
+        <div class="rider-item">
+          <div class="rider-avatar">⚡</div>
+          <div class="rider-info"><div class="rider-name">Dev Anand</div><div class="rider-bike">Bajaj Dominar 400</div></div>
+          <div><div class="rider-dist" style="margin-top:4px;color:var(--grey)">11km</div></div>
+        </div>
+        <div style="margin-top:28px">
+          <button class="btn-primary" style="width:100%;text-align:center;font-size:13px" onclick="showPage('waitlist')">Join to See Real Map</button>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="container" style="margin-top:80px">
+      <div class="sos-features reveal">
+        <div class="sos-card">
+          <div class="icon">📡</div>
+          <h4>Real-Time GPS</h4>
+          <p>Rider positions updated every 5 seconds. No lag, no guessing — always accurate.</p>
+        </div>
+        <div class="sos-card">
+          <div class="icon">🔴</div>
+          <h4>SOS Alerts on Map</h4>
+          <p>Active SOS calls appear as flashing red alerts on the live map. Riders respond in minutes.</p>
+        </div>
+        <div class="sos-card">
+          <div class="icon">⛽</div>
+          <h4>Fuel Stops Marked</h4>
+          <p>Community-tagged petrol pumps and rest stops visible right on the rider map.</p>
+        </div>
+        <div class="sos-card">
+          <div class="icon">🛡️</div>
+          <h4>Privacy Modes</h4>
+          <p>Ghost mode for when you want to ride solo. Full control over your visibility at all times.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== SOS PAGE ===== -->
+<div class="page" id="page-sos">
+  <div class="sos-hero">
+    <div class="sos-ring" style="animation-delay:0s"></div>
+    <div class="sos-ring" style="animation-delay:1s"></div>
+    <div class="sos-ring" style="animation-delay:2s"></div>
+    <div class="hero-content">
+      <div class="section-label" style="justify-content:center;display:flex">Safety First</div>
+      <h1 class="section-title" style="font-size:clamp(48px,8vw,100px)">THE FEATURE THAT<br>CAN <span style="color:var(--red)">SAVE LIVES.</span></h1>
+      <p style="font-size:18px;color:var(--grey);margin-top:20px;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.7">One highway breakdown can end a life. ClutchX SOS turns 230 million riders into an emergency response network.</p>
+      <button class="sos-btn-demo" style="margin:48px auto">SOS<span>Hold 3 sec</span></button>
+      <p style="font-size:13px;color:var(--grey);letter-spacing:2px;text-transform:uppercase">Demo button — shows emergency broadcast interface</p>
+    </div>
+  </div>
+  <section>
+    <div class="container">
+      <div class="sos-features reveal">
+        <div class="sos-card">
+          <div class="icon">⏱️</div>
+          <h4>3-Second Activation</h4>
+          <p>Hold for 3 seconds to trigger emergency broadcast. No typing, no unlocking — works even with gloves on.</p>
+        </div>
+        <div class="sos-card">
+          <div class="icon">📡</div>
+          <h4>25km Rider Alert</h4>
+          <p>Instantly notifies every ClutchX rider within 25km. Real people, real bikes, real response.</p>
+        </div>
+        <div class="sos-card">
+          <div class="icon">📍</div>
+          <h4>Live Location Broadcast</h4>
+          <p>Your GPS location broadcast continuously until you mark safe. Every responder sees your exact position.</p>
+        </div>
+        <div class="sos-card">
+          <div class="icon">👩</div>
+          <h4>Women Safety Mode</h4>
+          <p>Special mode for solo women riders. Shares live location with trusted contacts and enables silent SOS.</p>
+        </div>
+        <div class="sos-card">
+          <div class="icon">🤖</div>
+          <h4>Crash Detection AI</h4>
+          <p>Sudden impact detected automatically. 30-second grace period to cancel before auto-SOS fires.</p>
+        </div>
+        <div class="sos-card">
+          <div class="icon">📞</div>
+          <h4>Emergency Contacts</h4>
+          <p>Family and friends get SMS + call with your location when SOS activates. Full transparency, always.</p>
+        </div>
+      </div>
+      <div class="reveal" style="text-align:center;margin-top:80px;padding:60px;background:rgba(229,57,53,0.05);border:1px solid rgba(229,57,53,0.2);border-radius:4px">
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,56px);letter-spacing:2px;margin-bottom:16px">NEVER RIDE ALONE.<br><span style="color:var(--red)">EVEN WHEN YOU ARE.</span></h3>
+        <p style="font-size:16px;color:var(--grey);max-width:480px;margin:0 auto 32px;line-height:1.7">The ClutchX SOS network is always on, always watching. Join the brotherhood that has your back.</p>
+        <button class="btn-primary" onclick="showPage('waitlist')">Join ClutchX</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== TRIPS PAGE ===== -->
+<div class="page" id="page-trips">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Trips & Community</div>
+        <h1 class="section-title">PLAN RIDES.<br>BUILD <span style="color:var(--red)">BROTHERHOOD.</span></h1>
+        <div class="divider"></div>
+        <p class="section-sub">From a quick weekend escape to a 3-week Himalayan expedition — plan, join, and ride together.</p>
+      </div>
+      <div class="trips-grid reveal">
+        <div class="trip-card">
+          <div class="trip-bg" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80')"></div>
+          <div class="trip-overlay"></div>
+          <div class="trip-content">
+            <div class="trip-tag">🏔️ Himalayan Epic</div>
+            <div class="trip-name">Ladakh Circuit</div>
+            <div class="trip-meta">
+              <div class="trip-riders"><strong>42</strong> Riders Joined</div>
+              <button class="trip-join" onclick="showPage('waitlist')">Join Ride</button>
+            </div>
+          </div>
+        </div>
+        <div class="trip-card">
+          <div class="trip-bg" style="background-image:url('https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=800&q=80')"></div>
+          <div class="trip-overlay"></div>
+          <div class="trip-content">
+            <div class="trip-tag">❄️ High Altitude</div>
+            <div class="trip-name">Spiti Valley</div>
+            <div class="trip-meta">
+              <div class="trip-riders"><strong>28</strong> Riders Joined</div>
+              <button class="trip-join" onclick="showPage('waitlist')">Join Ride</button>
+            </div>
+          </div>
+        </div>
+        <div class="trip-card">
+          <div class="trip-bg" style="background-image:url('https://images.unsplash.com/photo-1502126324834-38f8e02d7160?w=800&q=80')"></div>
+          <div class="trip-overlay"></div>
+          <div class="trip-content">
+            <div class="trip-tag">🌊 Coastal Ride</div>
+            <div class="trip-name">Goa Circuit</div>
+            <div class="trip-meta">
+              <div class="trip-riders"><strong>67</strong> Riders Joined</div>
+              <button class="trip-join" onclick="showPage('waitlist')">Join Ride</button>
+            </div>
+          </div>
+        </div>
+        <div class="trip-card">
+          <div class="trip-bg" style="background-image:url('https://images.unsplash.com/photo-1486911278844-a81c5267e227?w=800&q=80')"></div>
+          <div class="trip-overlay"></div>
+          <div class="trip-content">
+            <div class="trip-tag">🌿 Northeast Trail</div>
+            <div class="trip-name">Meghalaya Loop</div>
+            <div class="trip-meta">
+              <div class="trip-riders"><strong>19</strong> Riders Joined</div>
+              <button class="trip-join" onclick="showPage('waitlist')">Join Ride</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="why-grid reveal" style="margin-top:80px">
+        <div class="why-card"><div class="why-icon">🗺️</div><div class="why-title">Smart Route Planning</div><div class="why-desc">Plan routes with real rider data — community fuel stops, difficulty ratings, and altitude warnings baked in.</div><div class="why-accent"></div></div>
+        <div class="why-card"><div class="why-icon">💬</div><div class="why-title">Auto Group Chat</div><div class="why-desc">Every trip creates its own group chat automatically. Coordinate, check-in, and share moments in real time.</div><div class="why-accent"></div></div>
+        <div class="why-card"><div class="why-icon">💰</div><div class="why-title">Expense Splitting</div><div class="why-desc">Track fuel, accommodation, and food costs. Split expenses fairly within the app. No more awkward calculations.</div><div class="why-accent"></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== FEED PAGE ===== -->
+<div class="page" id="page-feed">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Explore Feed</div>
+        <h1 class="section-title">THE MOTO WORLD'S<br><span style="color:var(--red)">SOCIAL HUB.</span></h1>
+        <div class="divider"></div>
+        <p class="section-sub">Moto reels, ride stories, route reviews, bike setups — all in one place, curated for riders by riders.</p>
+      </div>
+      <div class="feed-grid reveal">
+        <div class="reel-card">
+          <div class="reel-thumb" style="background:linear-gradient(135deg,#1a1a2e,#0d0d1a)">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:80px">🏔️</div>
+            <div class="reel-play"><div class="play-btn">▶</div></div>
+          </div>
+          <div class="reel-info">
+            <div class="reel-user"><div class="reel-avatar">🏍️</div><div class="reel-username">@arjun_ktm</div></div>
+            <div class="reel-caption">Khardung La at 5,359m. The pass that breaks you and makes you. #Ladakh</div>
+            <div class="reel-tags"><span class="tag">#Ladakh</span><span class="tag">#KTM390</span><span class="tag">#Brotherhood</span></div>
+            <div class="reel-actions">
+              <div class="reel-action">❤️ 847</div>
+              <div class="reel-action">💬 34</div>
+              <div class="reel-action">↗️ Share</div>
+            </div>
+          </div>
+        </div>
+        <div class="reel-card">
+          <div class="reel-thumb" style="background:linear-gradient(135deg,#1a0d0d,#2e1a1a)">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:80px">🌅</div>
+            <div class="reel-play"><div class="play-btn">▶</div></div>
+          </div>
+          <div class="reel-info">
+            <div class="reel-user"><div class="reel-avatar">🛵</div><div class="reel-username">@priya_rides</div></div>
+            <div class="reel-caption">Solo sunrise run on NH44. Nothing beats early morning highways. This is freedom.</div>
+            <div class="reel-tags"><span class="tag">#SoloRide</span><span class="tag">#Sunrise</span><span class="tag">#NH44</span></div>
+            <div class="reel-actions">
+              <div class="reel-action">❤️ 1.2K</div>
+              <div class="reel-action">💬 89</div>
+              <div class="reel-action">↗️ Share</div>
+            </div>
+          </div>
+        </div>
+        <div class="reel-card">
+          <div class="reel-thumb" style="background:linear-gradient(135deg,#0d1a0d,#1a2e1a)">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:80px">🌿</div>
+            <div class="reel-play"><div class="play-btn">▶</div></div>
+          </div>
+          <div class="reel-info">
+            <div class="reel-user"><div class="reel-avatar">⚡</div><div class="reel-username">@vikram_scrambler</div></div>
+            <div class="reel-caption">Meghalaya on a Ducati Scrambler. Roads so perfect they don't feel real. Tag your ride buddy 👇</div>
+            <div class="reel-tags"><span class="tag">#Meghalaya</span><span class="tag">#Ducati</span><span class="tag">#NorthEast</span></div>
+            <div class="reel-actions">
+              <div class="reel-action">❤️ 2.1K</div>
+              <div class="reel-action">💬 142</div>
+              <div class="reel-action">↗️ Share</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal" style="text-align:center;margin-top:60px">
+        <button class="btn-primary" onclick="showPage('waitlist')">Join to See Full Feed</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== INVESTORS PAGE ===== -->
+<div class="page" id="page-investors">
+  <section class="investor-hero">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Investor Relations</div>
+        <h1 class="section-title">MASSIVE,<br>UNTAPPED<br><span style="color:var(--red)">MARKET.</span></h1>
+        <div class="divider"></div>
+        <p class="section-sub">India is the world's largest 2-wheeler market. No company has built the social layer for it. We're raising ₹2.5 Cr seed to change that.</p>
+      </div>
+      <div class="metrics-grid reveal">
+        <div class="metric-card"><div class="metric-num">230M</div><div class="metric-label">Motorcycles in India</div></div>
+        <div class="metric-card"><div class="metric-num">21M</div><div class="metric-label">New Bikes / Year</div></div>
+        <div class="metric-card"><div class="metric-num">₹8,400Cr</div><div class="metric-label">Ad Market Size</div></div>
+        <div class="metric-card"><div class="metric-num">$300K</div><div class="metric-label">Seed Ask (USD)</div></div>
+        <div class="metric-card"><div class="metric-num">18mo</div><div class="metric-label">Runway</div></div>
+        <div class="metric-card"><div class="metric-num">₹15Cr</div><div class="metric-label">Series A Target</div></div>
+      </div>
+
+      <div class="reveal">
+        <div class="section-label">Business Model</div>
+        <h2 class="section-title" style="font-size:clamp(32px,4vw,56px)">MULTIPLE <span style="color:var(--red)">REVENUE STREAMS.</span></h2>
+        <div class="why-grid" style="margin-top:40px">
+          <div class="why-card"><div class="why-icon">💎</div><div class="why-title">ClutchX+ Subscription</div><div class="why-desc">₹149/month premium tier. Advanced route tools, unlimited SOS, priority matching, exclusive trips. Target: 8K paying by Year 1.</div><div class="why-accent"></div></div>
+          <div class="why-card"><div class="why-icon">📢</div><div class="why-title">Brand Advertising</div><div class="why-desc">Premium motorcycle brands pay to reach India's most engaged biker community. Hyper-targeted, high-intent audience.</div><div class="why-accent"></div></div>
+          <div class="why-card"><div class="why-icon">🏨</div><div class="why-title">Ride Commerce</div><div class="why-desc">Hotel bookings, gear marketplace, service centre referrals. 10-15% commission on every transaction facilitated.</div><div class="why-accent"></div></div>
+          <div class="why-card"><div class="why-icon">📊</div><div class="why-title">Data & Insights</div><div class="why-desc">Anonymised riding pattern data for OEMs, government road planners, and insurance companies.</div><div class="why-accent"></div></div>
+        </div>
+      </div>
+
+      <div class="roadmap reveal" style="margin-top:80px">
+        <div class="section-label">Roadmap</div>
+        <h2 class="section-title" style="font-size:clamp(32px,4vw,56px)">PATH TO <span style="color:var(--red)">₹10Cr ARR.</span></h2>
+        <div style="margin-top:40px">
+          <div class="roadmap-item"><div class="roadmap-phase">01</div><div class="roadmap-content"><h4>Seed Round — Launch (Month 1-6)</h4><p>Close ₹2.5Cr seed. Launch Android beta in 5 metro cities. Onboard 200K riders. Activate SOS network and club partnerships.</p></div></div>
+          <div class="roadmap-item"><div class="roadmap-phase">02</div><div class="roadmap-content"><h4>Growth — Series A Prep (Month 6-14)</h4><p>Expand to 20 cities. Launch ClutchX+ subscription. Hit 80K MAU. First brand partnerships. Crash detection AI live.</p></div></div>
+          <div class="roadmap-item"><div class="roadmap-phase">03</div><div class="roadmap-content"><h4>Series A — Scale (Month 14-24)</h4><p>₹15Cr Series A. 100K+ MAU. iOS launch. Pan-India expansion. Revenue: ₹2.5Cr ARR. Break even achieved.</p></div></div>
+          <div class="roadmap-item" style="border:none"><div class="roadmap-phase">04</div><div class="roadmap-content"><h4>Global Expansion (Year 3+)</h4><p>Southeast Asia launch — Vietnam, Indonesia, Thailand. 1M+ MAU globally. ₹10Cr ARR. Series B positioning.</p></div></div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="section-label">The Team</div>
+        <h2 class="section-title" style="font-size:clamp(32px,4vw,56px)">BUILT BY RIDERS,<br><span style="color:var(--red)">FOR RIDERS.</span></h2>
+        <div class="team-grid">
+          <div class="team-card"><div class="team-avatar">RK</div><div class="team-name">Rahul Kumar</div><div class="team-role">CEO & Co-Founder</div><div class="team-bio">IIT Bombay • Ex-Ola Product Lead. 6 years building consumer products at scale.</div><div class="team-bike">🏍️ Royal Enfield Himalayan</div></div>
+          <div class="team-card"><div class="team-avatar">PS</div><div class="team-name">Priya Sharma</div><div class="team-role">CTO & Co-Founder</div><div class="team-bio">BITS Pilani • Ex-Swiggy Backend. Architected systems serving 10M+ users daily.</div><div class="team-bike">🏍️ KTM Duke 390</div></div>
+          <div class="team-card"><div class="team-avatar">AK</div><div class="team-name">Arjun Kaul</div><div class="team-role">Head of Growth</div><div class="team-bio">IIM Ahmedabad • Ex-Byju's Growth. Scaled EdTech app from 0 to 500K installs in 8 months.</div><div class="team-bike">🏍️ Ducati Scrambler</div></div>
+          <div class="team-card"><div class="team-avatar">VS</div><div class="team-name">Vivek Singh</div><div class="team-role">Lead Android Dev</div><div class="team-bio">IIIT Delhi • 5 years Android. Built real-time GPS tracking systems for logistics platforms.</div><div class="team-bike">🏍️ Bajaj Dominar 400</div></div>
+        </div>
+      </div>
+
+      <div class="reveal" style="text-align:center;margin-top:80px;padding:80px 40px;background:var(--carbon);border:1px solid rgba(255,255,255,0.06);border-radius:4px">
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,64px);letter-spacing:3px;margin-bottom:16px">JOIN THE RIDE.</h3>
+        <p style="font-size:16px;color:var(--grey);max-width:500px;margin:0 auto 32px;line-height:1.7">We're raising ₹2.5 Crore seed to launch India's first moto-social network. Request our full pitch deck.</p>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+          <a href="mailto:contact@clutchx.in" class="btn-primary">Request Pitch Deck</a>
+          <a href="mailto:contact@clutchx.in" class="btn-outline">contact@clutchx.in</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== CAREERS PAGE ===== -->
+<div class="page" id="page-careers">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Careers</div>
+        <h1 class="section-title">BUILD THE FUTURE<br>OF <span style="color:var(--red)">RIDING.</span></h1>
+        <div class="divider"></div>
+        <p class="section-sub">We're a small team of riders building something massive. Join us if you're driven by speed — on the road and in code.</p>
+      </div>
+      <div class="jobs-list reveal">
+        <div class="job-item">
+          <div><div class="job-title">Android Developer</div><div class="job-meta"><span>Full Time</span><span>Bangalore / Remote</span><span>₹12-18 LPA</span></div></div>
+          <div style="display:flex;gap:12px;align-items:center"><span class="job-tag">Engineering</span><button class="btn-primary" style="font-size:12px;padding:10px 20px">Apply Now</button></div>
+        </div>
+        <div class="job-item">
+          <div><div class="job-title">Backend Engineer (Node.js / Firebase)</div><div class="job-meta"><span>Full Time</span><span>Bangalore / Remote</span><span>₹14-20 LPA</span></div></div>
+          <div style="display:flex;gap:12px;align-items:center"><span class="job-tag">Engineering</span><button class="btn-primary" style="font-size:12px;padding:10px 20px">Apply Now</button></div>
+        </div>
+        <div class="job-item">
+          <div><div class="job-title">Senior UI/UX Designer</div><div class="job-meta"><span>Full Time</span><span>Remote</span><span>₹10-16 LPA</span></div></div>
+          <div style="display:flex;gap:12px;align-items:center"><span class="job-tag">Design</span><button class="btn-primary" style="font-size:12px;padding:10px 20px">Apply Now</button></div>
+        </div>
+        <div class="job-item">
+          <div><div class="job-title">Community Manager</div><div class="job-meta"><span>Full Time</span><span>Delhi / Remote</span><span>₹6-10 LPA</span></div></div>
+          <div style="display:flex;gap:12px;align-items:center"><span class="job-tag">Growth</span><button class="btn-primary" style="font-size:12px;padding:10px 20px">Apply Now</button></div>
+        </div>
+        <div class="job-item">
+          <div><div class="job-title">City Expansion Lead</div><div class="job-meta"><span>Full Time</span><span>Multiple Cities</span><span>₹8-14 LPA</span></div></div>
+          <div style="display:flex;gap:12px;align-items:center"><span class="job-tag">Operations</span><button class="btn-primary" style="font-size:12px;padding:10px 20px">Apply Now</button></div>
+        </div>
+      </div>
+      <div class="reveal" style="margin-top:80px;padding:60px;background:var(--carbon);border:1px solid rgba(255,255,255,0.06);border-radius:4px;text-align:center">
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:3px;margin-bottom:16px">DON'T SEE YOUR ROLE?</h3>
+        <p style="color:var(--grey);font-size:16px;margin-bottom:28px">We're always looking for exceptional riders and builders. Drop us a line.</p>
+        <a href="mailto:careers@clutchx.in" class="btn-primary">careers@clutchx.in</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== BLOGS PAGE ===== -->
+<div class="page" id="page-blogs">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Ride Stories</div>
+        <h1 class="section-title">TALES FROM<br>THE <span style="color:var(--red)">ASPHALT.</span></h1>
+        <div class="divider"></div>
+      </div>
+      <div class="blog-grid reveal">
+        <div class="blog-featured">
+          <div class="blog-img" style="background:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80') center/cover"></div>
+          <div class="blog-overlay"></div>
+          <div class="blog-content">
+            <div class="blog-cat">Himalayan Epic</div>
+            <div class="blog-title" style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;line-height:1.1">Ladakh in January: The Ride That Changed Everything</div>
+            <div class="blog-date">March 2025 • 12 min read</div>
+          </div>
+        </div>
+        <div class="blog-small-list">
+          <div class="blog-small">
+            <div class="blog-small-img" style="background:url('https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=400&q=80') center/cover"></div>
+            <div><div class="blog-cat">High Altitude</div><div class="blog-title">Spiti Valley on a KTM 390: Everything They Don't Tell You</div><div class="blog-date">Feb 2025 • 8 min</div></div>
+          </div>
+          <div class="blog-small">
+            <div class="blog-small-img" style="background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80') center/cover"></div>
+            <div><div class="blog-cat">Safety</div><div class="blog-title">Highway Breakdown at Midnight: Why SOS Matters</div><div class="blog-date">Jan 2025 • 5 min</div></div>
+          </div>
+          <div class="blog-small">
+            <div class="blog-small-img" style="background:url('https://images.unsplash.com/photo-1502126324834-38f8e02d7160?w=400&q=80') center/cover"></div>
+            <div><div class="blog-cat">Community</div><div class="blog-title">How a Goa Group Ride Turned Into a Brotherhood</div><div class="blog-date">Dec 2024 • 6 min</div></div>
+          </div>
+          <div class="blog-small">
+            <div class="blog-small-img" style="background:url('https://images.unsplash.com/photo-1486911278844-a81c5267e227?w=400&q=80') center/cover"></div>
+            <div><div class="blog-cat">Bike Review</div><div class="blog-title">Royal Enfield Himalayan 450: Built for ClutchX Routes</div><div class="blog-date">Nov 2024 • 7 min</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== CLUBS PAGE ===== -->
+<div class="page" id="page-clubs">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Rider Clubs</div>
+        <h1 class="section-title">YOUR TRIBE<br>AWAITS <span style="color:var(--red)">YOU.</span></h1>
+        <div class="divider"></div>
+        <p class="section-sub">Officially verified rider clubs on ClutchX. Find your local chapter or create a new one.</p>
+      </div>
+      <div class="clubs-grid reveal">
+        <div class="club-card"><div class="club-badge">🏔️</div><div class="club-name">Himalayan Raiders</div><div class="club-city">Delhi NCR</div><div class="club-desc">India's premier high-altitude riding club. Members have collectively ridden 2M+ km across the Himalayas.</div><div class="club-members"><strong>847</strong> Members · Est. 2019</div></div>
+        <div class="club-card"><div class="club-badge">🦁</div><div class="club-name">Deccan Throttlers</div><div class="club-city">Pune & Mumbai</div><div class="club-desc">Western India's fastest growing riding community. Weekend rides, track days, charity events.</div><div class="club-members"><strong>632</strong> Members · Est. 2021</div></div>
+        <div class="club-card"><div class="club-badge">🌊</div><div class="club-name">Coastal Cruisers</div><div class="club-city">Goa & Kerala</div><div class="club-desc">The ocean road specialists. From Konkan coast to Kerala backwaters — we ride every inch of it.</div><div class="club-members"><strong>419</strong> Members · Est. 2020</div></div>
+        <div class="club-card"><div class="club-badge">⚡</div><div class="club-name">Silicon Riders</div><div class="club-city">Bangalore</div><div class="club-desc">Tech bros who ride. Weekend escapes from Bengaluru to Coorg, Ooty, and Chikmagalur.</div><div class="club-members"><strong>1,204</strong> Members · Est. 2018</div></div>
+        <div class="club-card"><div class="club-badge">🌿</div><div class="club-name">Northeast Explorers</div><div class="club-city">Guwahati</div><div class="club-desc">Unlocking India's last frontier. Arunachal, Meghalaya, Nagaland — one road at a time.</div><div class="club-members"><strong>287</strong> Members · Est. 2022</div></div>
+        <div class="club-card" style="border:1px dashed rgba(229,57,53,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+          <div class="club-badge">➕</div><div class="club-name">Start Your Club</div><div class="club-city">Your City</div><div class="club-desc">Create your own verified club on ClutchX. Tools for members, rides, and community built in.</div><div style="margin-top:20px"><button class="btn-primary" onclick="showPage('waitlist')">Create Club</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== ABOUT PAGE ===== -->
+<div class="page" id="page-about">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Our Story</div>
+        <h1 class="section-title">BUILT BY RIDERS,<br><span style="color:var(--red)">FOR RIDERS.</span></h1>
+      </div>
+      <div class="about-intro reveal">
+        <div class="about-visual"></div>
+        <div class="about-text">
+          <h2>WE WERE STUCK ON A<br>HIGHWAY AT 2AM.</h2>
+          <p>Our founder's Royal Enfield died on NH44, 60km from the nearest town. No way to alert other riders. No way to find help. Just WhatsApp groups that nobody checked at that hour.</p>
+          <p>That night, ClutchX was born. The idea that India's 230 million riders deserved something better than scattered group chats and borrowed Instagram pages.</p>
+          <p>Two years later, we're building the platform we wish had existed — a real moto-social network, built India-first, for the Indian riding spirit.</p>
+          <div class="about-values">
+            <div class="value-item"><div class="value-dot"></div><div class="value-text">Rider safety above everything else</div></div>
+            <div class="value-item"><div class="value-dot"></div><div class="value-text">Built for Bharat, not borrowed from the West</div></div>
+            <div class="value-item"><div class="value-dot"></div><div class="value-text">Brotherhood is the product, technology is the tool</div></div>
+            <div class="value-item"><div class="value-dot"></div><div class="value-text">Every road leads somewhere worth riding to</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="team-grid reveal" style="margin-top:80px">
+        <div class="team-card"><div class="team-avatar">RK</div><div class="team-name">Rahul Kumar</div><div class="team-role">CEO & Co-Founder</div><div class="team-bio">IIT Bombay. Ex-Ola Product. 6 years in consumer tech. Rides a Royal Enfield Himalayan to every investor meeting.</div><div class="team-bike">🏍️ RE Himalayan 450</div></div>
+        <div class="team-card"><div class="team-avatar">PS</div><div class="team-name">Priya Sharma</div><div class="team-role">CTO & Co-Founder</div><div class="team-bio">BITS Pilani. Ex-Swiggy backend. First woman to complete the India circumnavigation solo. Builds systems as reliably as she rides.</div><div class="team-bike">🏍️ KTM Duke 390</div></div>
+        <div class="team-card"><div class="team-avatar">AK</div><div class="team-name">Arjun Kaul</div><div class="team-role">Head of Growth</div><div class="team-bio">IIM Ahmedabad. Ex-Byju's. Doesn't sleep. Has somehow also managed to ride in 23 Indian states.</div><div class="team-bike">🏍️ Ducati Scrambler</div></div>
+        <div class="team-card"><div class="team-avatar">VS</div><div class="team-name">Vivek Singh</div><div class="team-role">Lead Android Dev</div><div class="team-bio">IIIT Delhi. 5 years Android. Has never missed a group ride in 4 years and his code compiles on the first try.</div><div class="team-bike">🏍️ Bajaj Dominar 400</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== WAITLIST PAGE ===== -->
+<div class="page" id="page-waitlist">
+  <div class="waitlist-hero">
+    <div class="section-label" style="display:block">Limited Spots</div>
+    <h1 class="section-title" style="font-size:clamp(48px,8vw,100px)">INDIA'S RIDING<br>BROTHERHOOD<br><span style="color:var(--red)">STARTS HERE.</span></h1>
+    <div class="divider divider-center"></div>
+    <p class="section-sub" style="margin:0 auto;text-align:center">Be among the first riders to join ClutchX. Beta riders get lifetime access to ClutchX+ free.</p>
+  </div>
+  <div class="container" style="max-width:700px">
+    <div class="waitlist-form reveal">
+      <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:4px;text-transform:uppercase;color:var(--grey);margin-bottom:32px">🔴 <span id="riderCount">4,827</span> Riders Already Joined</h3>
+      <div class="form-grid">
+        <div class="form-group"><label>Full Name</label><input type="text" placeholder="Arjun Kaul"></div>
+        <div class="form-group"><label>City</label><input type="text" placeholder="Delhi, Bangalore..."></div>
+        <div class="form-group"><label>Bike Model</label><input type="text" placeholder="KTM 390, RE Himalayan..."></div>
+        <div class="form-group"><label>Riding Experience</label>
+          <select><option>Under 1 Year</option><option>1-3 Years</option><option>3-5 Years</option><option>5+ Years</option><option>10+ Years</option></select>
+        </div>
+        <div class="form-group full"><label>Email Address</label><input type="email" placeholder="you@email.com"></div>
+        <div class="form-group full"><label>Phone Number</label><input type="tel" placeholder="+91 98765 43210"></div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn-primary" style="flex:1;min-width:160px" onclick="submitWaitlist()">Join Waitlist</button>
+        <button class="btn-outline" style="flex:1;min-width:160px" onclick="submitWaitlist()">Become Beta Rider</button>
+      </div>
+      <p style="font-size:12px;color:var(--grey);margin-top:20px;text-align:center">Beta riders get free ClutchX+ for life. No credit card required.</p>
+    </div>
+  </div>
+  <!-- SUCCESS POPUP -->
+  <div class="success-popup" id="successPopup">
+    <div class="success-box">
+      <div class="success-icon">🏍️</div>
+      <h3>YOU'RE IN THE<br><span style="color:var(--red)">BROTHERHOOD!</span></h3>
+      <p>Welcome to ClutchX. We'll reach out when beta launches in your city. Ride safe.</p>
+      <button class="btn-primary success-close" onclick="document.getElementById('successPopup').classList.remove('show')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DOWNLOAD PAGE ===== -->
+<div class="page" id="page-download">
+  <div class="download-hero">
+    <div class="download-content">
+      <div class="section-label">Download ClutchX</div>
+      <h1>RIDE<br>WITH THE<br><span style="color:var(--red)">BROTHERHOOD.</span></h1>
+      <p>India's First Moto-Social App. Live rider map, SOS emergency network, group trips, and a community of riders who have your back.</p>
+      <div class="store-btns">
+        <a href="#" class="store-btn">
+          <div class="store-icon">🤖</div>
+          <div class="store-text"><span>Get it on</span><strong>Google Play</strong></div>
+        </a>
+        <a href="#" class="store-btn">
+          <div class="store-icon">🍎</div>
+          <div class="store-text"><span>Download on the</span><strong>App Store</strong></div>
+        </a>
+      </div>
+      <p style="font-size:13px;color:var(--grey);margin-top:24px;letter-spacing:1px">⚠️ App launching Q3 2025 — <a href="#" onclick="showPage('waitlist');return false" style="color:var(--red);text-decoration:none">Join waitlist</a> to be first</p>
+    </div>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="phone-logo">CLUTCH<span>X</span></div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;color:var(--grey);margin-top:8px">RIDE • CONNECT • BROTHERHOOD</div>
+        <div style="margin-top:32px;font-size:32px">🗺️</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--grey);margin-top:8px">4 riders near you</div>
+        <div style="width:40px;height:2px;background:var(--red);margin:20px auto"></div>
+        <div style="font-size:24px">🆘</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--grey);margin-top:6px">SOS Active</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONTACT PAGE ===== -->
+<div class="page" id="page-contact">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Get In Touch</div>
+        <h1 class="section-title">LET'S RIDE<br><span style="color:var(--red)">TOGETHER.</span></h1>
+        <div class="divider"></div>
+      </div>
+      <div class="contact-grid reveal">
+        <div class="contact-info">
+          <h3>REACH THE<br>CLUTCHX TEAM.</h3>
+          <div class="contact-item"><div class="contact-icon">📧</div><div><div class="contact-label">General</div><div class="contact-val">contact@clutchx.in</div></div></div>
+          <div class="contact-item"><div class="contact-icon">💼</div><div><div class="contact-label">Investors</div><div class="contact-val">investors@clutchx.in</div></div></div>
+          <div class="contact-item"><div class="contact-icon">🤝</div><div><div class="contact-label">Partnerships</div><div class="contact-val">partners@clutchx.in</div></div></div>
+          <div class="contact-item"><div class="contact-icon">💻</div><div><div class="contact-label">Careers</div><div class="contact-val">careers@clutchx.in</div></div></div>
+          <div class="contact-item"><div class="contact-icon">📍</div><div><div class="contact-label">Headquarters</div><div class="contact-val">Bangalore, India 🇮🇳</div></div></div>
+        </div>
+        <div class="contact-form">
+          <div class="form-group"><label>Your Name</label><input type="text" placeholder="Rahul Singh"></div>
+          <div class="form-group"><label>Email</label><input type="email" placeholder="you@email.com"></div>
+          <div class="form-group"><label>Subject</label><input type="text" placeholder="Partnership / Investment / General"></div>
+          <div class="form-group"><label>Message</label><textarea style="width:100%;background:var(--metal);border:1px solid rgba(255,255,255,0.08);color:var(--white);padding:14px 16px;border-radius:2px;font-family:'Barlow',sans-serif;font-size:15px;outline:none;resize:vertical;min-height:120px" placeholder="Tell us about yourself..."></textarea></div>
+          <button class="btn-primary" style="width:100%" onclick="alert('Message sent! We\'ll respond within 24 hours.')">Send Message</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== FAQ PAGE ===== -->
+<div class="page" id="page-faq">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">FAQ</div>
+        <h1 class="section-title">QUESTIONS?<br>WE'VE GOT <span style="color:var(--red)">ANSWERS.</span></h1>
+        <div class="divider"></div>
+      </div>
+      <div class="faq-list reveal">
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What is ClutchX? <span class="faq-icon">+</span></button><div class="faq-a">ClutchX is India's first moto-social network — a platform built exclusively for motorcycle riders. It combines a live rider map, emergency SOS network, group trip planning, and a rider-only social feed in one app.</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">When does the app launch? <span class="faq-icon">+</span></button><div class="faq-a">We're targeting a Q3 2025 Android beta launch in 5 metro cities: Delhi, Bangalore, Mumbai, Pune, and Hyderabad. iOS follows in Q1 2026. Join the waitlist to be first in your city.</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Is ClutchX free to use? <span class="faq-icon">+</span></button><div class="faq-a">Yes — ClutchX is free for all riders. We also offer ClutchX+ at ₹149/month for premium features including advanced route tools, unlimited SOS, priority rider matching, and exclusive trip access. Beta riders get ClutchX+ free for life.</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How does the SOS system work? <span class="faq-icon">+</span></button><div class="faq-a">Hold the SOS button for 3 seconds to broadcast an emergency to all ClutchX riders within 25km. Your live GPS location is shared continuously until you mark safe. Simultaneously, your emergency contacts receive an SMS and call with your location.</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Which bikes are supported? <span class="faq-icon">+</span></button><div class="faq-a">ClutchX works with any motorcycle — Royal Enfield, KTM, Bajaj, Hero, Honda, Ducati, BMW, Triumph, and every other brand. We're a platform for all riders, not just premium bikes.</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How is ClutchX different from Strava or REVER? <span class="faq-icon">+</span></button><div class="faq-a">Strava is built for cyclists. REVER is a Western product with no India focus and no social features. ClutchX is India-first, moto-specific, and combines the social features of Instagram with the safety features of a dedicated emergency network — nothing like this exists for Indian riders.</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I create a rider club on ClutchX? <span class="faq-icon">+</span></button><div class="faq-a">Yes. Any rider can create or apply for a verified club on ClutchX. Clubs get dedicated pages, member management tools, trip planning features, and visibility on the live rider map.</div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How can I invest in ClutchX? <span class="faq-icon">+</span></button><div class="faq-a">We're currently raising our ₹2.5 Crore seed round. Email investors@clutchx.in to request the full pitch deck and schedule a call with the founding team.</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== PRIVACY PAGE ===== -->
+<div class="page" id="page-privacy">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="section-label">Legal</div>
+      <h1 class="section-title">PRIVACY <span style="color:var(--red)">POLICY.</span></h1>
+      <div class="legal-content">
+        <p>Last updated: March 2025 | Effective: March 1, 2025</p>
+        <h2>1. Information We Collect</h2>
+        <p>ClutchX collects information to provide and improve our services. This includes location data (GPS coordinates when the app is active), profile information you provide, ride statistics and route data, and device information.</p>
+        <h2>2. Location Data</h2>
+        <p>We collect precise GPS data to power the live rider map and SOS features. You can control your visibility settings at any time, including enabling ghost mode to ride privately. Location data is never sold to third parties.</p>
+        <h2>3. SOS Emergency Data</h2>
+        <p>When SOS is activated, your location is broadcast to nearby riders and your pre-designated emergency contacts. This data is used solely for emergency response purposes and deleted after 48 hours.</p>
+        <h2>4. How We Use Your Data</h2>
+        <ul><li>Power the live rider map and nearby rider discovery</li><li>Enable SOS emergency broadcasts</li><li>Provide trip planning and route features</li><li>Improve app performance and features</li><li>Send relevant notifications (which you can disable)</li></ul>
+        <h2>5. Data Sharing</h2>
+        <p>We do not sell your personal data. Anonymised, aggregated data may be shared with research partners. Emergency data is shared only as required for emergency response.</p>
+        <h2>6. Contact</h2>
+        <p>For privacy concerns, email privacy@clutchx.in. Our Data Protection Officer can be reached at dpo@clutchx.in.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== TERMS PAGE ===== -->
+<div class="page" id="page-terms">
+  <section style="padding-top:140px">
+    <div class="container">
+      <div class="section-label">Legal</div>
+      <h1 class="section-title">TERMS &<br><span style="color:var(--red)">CONDITIONS.</span></h1>
+      <div class="legal-content">
+        <p>Last updated: March 2025</p>
+        <h2>1. Acceptance of Terms</h2>
+        <p>By using ClutchX, you agree to these terms. If you do not agree, do not use the app. ClutchX is a platform for motorcycle riders aged 18 and above.</p>
+        <h2>2. User Conduct</h2>
+        <ul><li>You are responsible for all rides you undertake using ClutchX</li><li>Do not use the app while actively riding (use voice commands or stop safely)</li><li>False SOS activations are prohibited and may result in account suspension</li><li>Respect other riders in the community</li></ul>
+        <h2>3. SOS Disclaimer</h2>
+        <p>ClutchX SOS is a community-powered emergency network. We do not guarantee response times. Always contact official emergency services (112) in life-threatening situations. ClutchX supplements, but does not replace, official emergency services.</p>
+        <h2>4. Location Data</h2>
+        <p>You grant ClutchX permission to access your location when using the app. You can revoke this at any time from your device settings, though this will disable core features.</p>
+        <h2>5. Intellectual Property</h2>
+        <p>ClutchX brand, logo, and technology are the property of ClutchX Technologies Pvt. Ltd. User-generated content remains the property of the creator, with a licence granted to ClutchX for platform use.</p>
+        <h2>6. Governing Law</h2>
+        <p>These terms are governed by the laws of India. Any disputes are subject to the jurisdiction of courts in Bangalore, Karnataka.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer id="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">CLUTCH<span style="color:var(--red)">X</span></div>
+        <p>India's First Moto-Social Network. Live rider map, emergency SOS, group trips, and a community of riders who have your back.</p>
+        <p style="margin-top:12px;font-size:13px;color:var(--grey)">contact@clutchx.in</p>
+        <div class="social-links">
+          <a href="#" class="social-link" title="Instagram">📸</a>
+          <a href="#" class="social-link" title="YouTube">▶</a>
+          <a href="#" class="social-link" title="Twitter">🐦</a>
+          <a href="#" class="social-link" title="LinkedIn">💼</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#" onclick="showPage('features');return false">Features</a>
+        <a href="#" onclick="showPage('map');return false">Rider Map</a>
+        <a href="#" onclick="showPage('sos');return false">Safety / SOS</a>
+        <a href="#" onclick="showPage('trips');return false">Trips</a>
+        <a href="#" onclick="showPage('feed');return false">Explore Feed</a>
+        <a href="#" onclick="showPage('download');return false">Download App</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="#" onclick="showPage('about');return false">About Us</a>
+        <a href="#" onclick="showPage('investors');return false">Investors</a>
+        <a href="#" onclick="showPage('careers');return false">Careers</a>
+        <a href="#" onclick="showPage('blogs');return false">Ride Stories</a>
+        <a href="#" onclick="showPage('clubs');return false">Rider Clubs</a>
+        <a href="#" onclick="showPage('contact');return false">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h5>Support</h5>
+        <a href="#" onclick="showPage('faq');return false">FAQ</a>
+        <a href="#" onclick="showPage('privacy');return false">Privacy Policy</a>
+        <a href="#" onclick="showPage('terms');return false">Terms & Conditions</a>
+        <a href="#" onclick="showPage('waitlist');return false">Join Waitlist</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 ClutchX Technologies Pvt. Ltd. All rights reserved.</p>
+      <p>Built In India <span class="footer-flag">🇮🇳</span> For Riders.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── CURSOR ───────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{
+  mx=e.clientX; my=e.clientY;
+  cursor.style.transform=`translate(${mx-6}px,${my-6}px)`;
+});
+function animRing(){
+  rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+  ring.style.transform=`translate(${rx-18}px,${ry-18}px)`;
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+// ─── LOADER ───────────────────────────────
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    const l=document.getElementById('loader');
+    l.style.opacity='0';
+    setTimeout(()=>{ l.style.display='none'; }, 800);
+  }, 1800);
+});
+
+// ─── NAVBAR ───────────────────────────────
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY>60);
+});
+
+// ─── MOBILE MENU ──────────────────────────
+function toggleMobile(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+// ─── PAGE NAVIGATION ──────────────────────
+const pageOrder = ['home','features','map','trips','sos','feed','investors','about','careers','blogs','clubs','waitlist','download','contact','faq','privacy','terms'];
+
+function showPage(id){
+  const t = document.getElementById('pageTransition');
+  t.classList.add('active');
+  setTimeout(()=>{
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const target = document.getElementById('page-'+id);
+    if(target){ target.classList.add('active'); }
+    window.scrollTo({top:0,behavior:'instant'});
+    t.classList.remove('active');
+    setTimeout(initReveals, 50);
+  }, 250);
+}
+
+// ─── SCROLL REVEAL ────────────────────────
+function initReveals(){
+  const reveals = document.querySelectorAll('.page.active .reveal');
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  },{threshold:0.08});
+  reveals.forEach(r=>obs.observe(r));
+}
+initReveals();
+
+// ─── PARTICLES ────────────────────────────
+(function createParticles(){
+  const container = document.getElementById('particles');
+  if(!container) return;
+  for(let i=0;i<25;i++){
+    const p = document.createElement('div');
+    p.className='particle';
+    p.style.cssText=`left:${Math.random()*100}%;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*8}s;--dx:${(Math.random()-0.5)*100}px;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px`;
+    container.appendChild(p);
+  }
+})();
+
+// ─── FAQ ──────────────────────────────────
+function toggleFaq(btn){
+  const item = btn.closest('.faq-item');
+  const allItems = document.querySelectorAll('.faq-item');
+  allItems.forEach(i=>{ if(i!==item){ i.classList.remove('open'); } });
+  item.classList.toggle('open');
+}
+
+// ─── WAITLIST ─────────────────────────────
+function submitWaitlist(){
+  document.getElementById('successPopup').classList.add('show');
+  // Increment counter
+  const el = document.getElementById('riderCount');
+  if(el){ el.textContent = (parseInt(el.textContent.replace(',',''))+1).toLocaleString(); }
+}
+
+// ─── VIDEO MODAL ──────────────────────────
+function openVideo(){
+  alert('🎬 Demo video coming soon — join the waitlist to be first to see it!');
+}
+
+// ─── RIDER COUNTER ANIMATION ──────────────
+function animateCounter(el, target, duration=2000){
+  let start=0; const step=target/60;
+  const timer=setInterval(()=>{
+    start+=step;
+    if(start>=target){ start=target; clearInterval(timer); }
+    el.textContent = Math.floor(start).toLocaleString();
+  }, duration/60);
+}
+const obs2 = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.stat-num').forEach(el=>{
+        const txt = el.textContent.replace(/[^\d]/g,'');
+        if(txt){ el.dataset.original = el.innerHTML; }
+      });
+    }
+  });
+},{threshold:0.3});
+document.querySelectorAll('.stats-row').forEach(r=>obs2.observe(r));
+</script>
+</body>
+</html>
